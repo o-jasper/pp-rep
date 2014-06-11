@@ -1,3 +1,4 @@
+##
 ##  Copyright (C) 11-06-2014 Jasper den Ouden.
 ##
 ##  This is free software: you can redistribute it and/or modify
@@ -8,9 +9,10 @@
 
 # Generic pathfind.
 
-from heapq import heapify, heappush, heappop  # Heap, used as priority list.
+from heapq import heappush, heappop  # Heap, used as priority list.
 
 g_run_i = 0
+
 
 class PathedNode:  # Dijkstras algorithm for finding paths.
     def __init__(self, addr, edges=None, context=None, data=None):
@@ -67,8 +69,8 @@ class PathedNode:  # Dijkstras algorithm for finding paths.
         path.append(cur)
         return path
 
-    # Pathfinds from self to goal, returns None if no path, the backtrack otherwise.
-    # goal.costval will contain the amount it costs.
+ # Pathfinds from self to goal, returns None if no path, the backtrack otherwise.
+ # goal.costval will contain the amount it costs.
     def pathfind(self, goal, run_i=None):
         if run_i is None:  # Note all nodes will have to be reset at some point.
             global g_run_i
