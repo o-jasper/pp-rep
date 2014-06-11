@@ -1,5 +1,5 @@
 
-# Reputation system approach for Ethereum
+# Per-participant Reputation system approach for Ethereum
 
 This project is to help figure out per-participant reputation systems. I.e. each
 participant has its own opinion about what the reputation of other nodes should

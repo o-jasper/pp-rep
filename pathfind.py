@@ -23,8 +23,8 @@ class PathedNode:  # Dijkstras algorithm for finding paths.
         self.costval = 0  # Values used for the pathfinding.
         self.run_i   = 0
 
-    def cost(self, to, i, goal):  # Cost between two positions.
-        return 1
+    def cost(self, at_cost, to, i, goal):  # Cost between two positions.
+        return at_cost + 1
 
     def step_from(self, heap, at_cost, run_i, goal):
         self.costval = at_cost
@@ -38,7 +38,9 @@ class PathedNode:  # Dijkstras algorithm for finding paths.
         for el in self.edges:
             i += 1
             if el.run_i != run_i:  # Add if wasnt already there.
-                heappush(heap, (at_cost + self.cost(el, i, goal), el))
+                heappush(heap, (self.cost(at_cost, el, i, goal), el))
+            elif el in goal:
+                return el
         return None
 
     # Pathfind from the node itself to the goal.
