@@ -11,7 +11,7 @@ def connect_chain(to_chain):
     return to_chain
 
 def make_chain(n):
-    return connect_chain(map(PathedNode, range(n)))
+    return connect_chain(map(lambda(x): PathedNode(x,[]), range(n)))
 
 def test_chain(n):
     chain = make_chain(n)
@@ -26,7 +26,7 @@ test_chain(20)
 
 def ensure_node(name, nodes):
     if name not in nodes:
-        nodes[name] = PathedNode(name)
+        nodes[name] = PathedNode(name, [])
     return nodes[name]
 
 #Creates netowrk by bunches of cains.
@@ -41,7 +41,7 @@ def create_network(lists, nodes=None):
     return nodes
 
 def listnames(nodes):
-    return map(lambda(el): el.data, nodes)
+    return map(lambda(el): el.addr, nodes)
 
 net = create_network([[1,2,3,4,5,6,7,8,9], [3,'a', 'b', 7]])
 # Thou shalt take the shortcut.
