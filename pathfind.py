@@ -11,7 +11,7 @@
 
 from heapq import heappush, heappop  # Heap, used as priority list.
 
-g_run_i = 0
+g_run_i = 0  # TODO when it wraps, all has to be reset!
 
 
 class PathedNode:  # Dijkstras algorithm for finding paths.

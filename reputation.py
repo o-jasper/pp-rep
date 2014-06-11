@@ -47,3 +47,6 @@ class EthereumContext:
 
         repdata, addrs = unzip(reputations)
         return repdata, map(self.figure_addr, addrs)
+
+# TODO next step is to gather low cost paths, multiple if needed.
+# 
