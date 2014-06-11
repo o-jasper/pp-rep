@@ -13,8 +13,9 @@ from heapq import heapify, heappush, heappop  # Heap, used as priority list.
 g_run_i = 0
 
 class PathedNode:  # Dijkstras algorithm for finding paths.
-    def __init__(self, addr, edges=None, context=None):
+    def __init__(self, addr, edges=None, context=None, data=None):
         self.addr = addr
+        self.data = data
         self.context = context
         self.edges = edges
         self.costval = 0  # Values used for the pathfinding.
@@ -26,10 +27,10 @@ class PathedNode:  # Dijkstras algorithm for finding paths.
     def step_from(self, heap, at_cost, run_i, goal):
         self.costval = at_cost
         self.run_i   = run_i
-        if self is goal:  # Found it, return it!
-            return goal
+        if self in goal:  # Found it, return it!
+            return self
         if self.edges is None:
-            self.addr, self.edges = self.context.figure_edges(self)
+            self.data, self.edges = self.context.figure_edges(self)
 
         i = 0
         for el in self.edges:
@@ -53,7 +54,7 @@ class PathedNode:  # Dijkstras algorithm for finding paths.
     def pathfind_track(self, goal, run_i):
         cur = self
         path = []
-        while cur is not goal:
+        while cur not in goal:
             first = True
             min_costval, nxt = 0, None
             for el in cur.edges:

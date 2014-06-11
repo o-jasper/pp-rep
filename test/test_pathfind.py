@@ -17,10 +17,10 @@ def test_chain(n):
     chain = make_chain(n)
     for k2 in range(n - 1):  #Overly exhaust stupidly identical possibilities.
         for k1 in range(n - k2):
-            path = chain[k1].pathfind(chain[-k2-1])
+            path = chain[k1].pathfind([chain[-k2-1]])
             assert len(path) == n - k2 - k1
    # Cannot go backward.
-    assert chain[-1].pathfind(chain[0]) is None
+    assert chain[-1].pathfind([chain[0]]) is None
 
 test_chain(20)
 
@@ -45,5 +45,5 @@ def listnames(nodes):
 
 net = create_network([[1,2,3,4,5,6,7,8,9], [3,'a', 'b', 7]])
 # Thou shalt take the shortcut.
-assert listnames(net[1].pathfind(net[9])) == [1,2,3,'a','b',7,8,9]
+assert listnames(net[1].pathfind([net[9]])) == [1,2,3,'a','b',7,8,9]
 
