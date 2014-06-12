@@ -2,10 +2,12 @@
 # Per-participant Reputation system approach for Ethereum
 
 This project is to help figure out per-participant reputation systems. I.e. each
-participant has its own opinion about what the reputation of other nodes should
-be.
+participant indicates its own opinion about what the reputation of other nodes
+should be, and gets implied reputations from it.
 
-Each participant indicates its opinion about the other participants.
+It should be possible to 'prove' to a contract that there is reputation from one
+to another. 
 
-A contract has to be able to prove to other contracts that it has such and such
-reputation. 
+This is essentially pathfinding through opinions of the participants, though
+it is a superset, because different paths are complementary. This pathfinding is
+done client-side and the paths are put in the message for checking.
