@@ -24,3 +24,6 @@ The Ethereum contract merely has to check.
 An idea is to take probabilities for chunks and make a somewhat lobsided tree
 that minimizes the average length of proving merkle paths. The checking mechanism
 doesnt care about the shape of the merkle tree, so it can be added later.
+
+On the other hand, off-chain, the efficiency in memory is better if things you want
+to keep track of are bunched together.
