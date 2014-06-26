@@ -89,7 +89,7 @@ func NewMerkleTreeGen() *MerkleTreeGen {
 	return &MerkleTreeGen{List:[]MerkleTreePortion{}}
 }
 
-// Adds chunk, returning the leaf the current is on.
+// Adds chunk, returning the leaf the current is on
 func (gen *MerkleTreeGen) AddChunk(chunk []byte, interest bool) *MerkleNode {
 	h := SetFirstBit(H(chunk), interest)
 	if len(gen.List) == 0 || gen.List[0].Depth != 1 {
@@ -144,7 +144,8 @@ func (node *MerkleNode) IsValid(recurse int32) bool {
 }
 
 func (node *MerkleNode) CorrespondsToChunk(chunk []byte) bool {
-	return SetFirstBit(H(chunk), false) == SetFirstBit(node.Hash, false)
+	return SetFirstBit(H(chunk), false) == SetFirstBit(node.Hash, false) && 
+		     node.Right == nil && node.Left == nil
 }
 
 // Calculated paths essentially make a compilation of the data needed to do the

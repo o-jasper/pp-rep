@@ -28,3 +28,51 @@ also, `merkletree.Finish` can sort-of be used prematurely for lobsidedness.
 
 On the other hand, off-chain, the efficiency in memory is better if things you want
 to keep track of are bunched together.
+
+### Functions
+
+    func NewMerkleTreeGen() *MerkleTreeGen
+    
+Creates an object that gathers chunks, creating the Merkle tree on the way.
+
+    func (gen *MerkleTreeGen) AddChunk(chunk []byte, interest bool) *MerkleNode
+    
+Allows `MerkleTreeGen` to do its thing, adding a `chunk` of data. 
+It returns `*MerkleNode`, which can be used to create those paths, *if*
+`interest == true`.
+
+    func (gen *MerkleTreeGen) Finish() *MerkleNode
+
+After calling this you can use the returned `*MerkleNode` as if you are
+finished, it can be used to get at the root hash (`.Hash`). You can continue, 
+however, but the paths mad from the node then go past that hash.
+
+    func (node *MerkleNode) Path() [][sha256.Size]byte
+    
+Makes a path from a merkle node to the top, so that it can be proven that the
+checksum of the a leaf corresponds to the root checksum.
+
+    func ExpectedRoot(H_leaf [sha256.Size]byte, path [][sha256.Size]byte) [sha256.Size]byte
+
+Returns the root expected, based on the leaf hash, and path.
+
+    func CorrectRoot(root [sha256.Size]byte, leaf []byte, path [][sha256.Size]byte) bool
+    
+Returns whether the root is correct, given the leaf chunk and path.
+
+**The following two** are sort-of alternative ways to use paths, they use parts
+of the constructed tree. However, the above are provided because you need a way
+to get the data is a simp;e binary format.
+
+    func (node *MerkleNode) IsValid(recurse int32) bool
+
+Tells you if the known tree upward from the given merkle node by the given
+recursions are valid. `recurse < 0` means that it will recurse all the way.
+
+    func (node *MerkleNode) CorrespondsToChunk(chunk []byte) bool
+
+Tells you that the `*MerkleNode` is 1) a leaf, and 2) corresponds to the chunk.
+
+**Some additional functions** are `H`, `H_2`, which are the how `sha256.Sum256`
+is modified to have the additional right/left and unintersting/interesting 
+information.

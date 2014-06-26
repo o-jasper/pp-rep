@@ -11,3 +11,6 @@ to another.
 This is essentially pathfinding through opinions of the participants, though
 it is a superset, because different paths are complementary. This pathfinding is
 done client-side and the paths are put in the message for checking.
+
+The project contains some basic pathfinding stuff in python, and a Merkle tree
+in `go` in `src/`.
