@@ -5,6 +5,7 @@ import (
 	"flag"
 	"math/rand"
 	"merkletree"
+	"crypto/sha256"
 )
 
 // Print helpers.
@@ -36,6 +37,14 @@ func rand_chunk(r *rand.Rand, n_min int32, n_max int32) []byte {
 	return rand_bytes(r, rand_range(r, n_min, n_max))
 }
 
+func to_bytes(x [sha256.Size]byte) []byte {
+	ret := []byte{}
+	for i := range x {
+		ret = append(ret, x[i])
+	}
+	return ret
+}
+
 //Adds a lot of chunks and lists the tree leaves.
 func run_test(seed int64, n_min int32, n_max int32, N int) {
 	r := rand.New(rand.NewSource(seed))
@@ -43,16 +52,27 @@ func run_test(seed int64, n_min int32, n_max int32, N int) {
 	gen := merkletree.NewMerkleTreeGen()  //Put chunks in.
 	list := []*merkletree.MerkleNode{}
 	for i:= 0 ; i < N ; i++ {
-		list = append(list, gen.AddChunk(rand_chunk(r, n_min, n_max), true))
+		chunk := rand_chunk(r, n_min, n_max)
+		list = append(list, gen.AddChunk(chunk, true))
 	}
 	roothash := gen.Finish().Hash  //Get the root hash.
+	fmt.Println("\nRoot:", bytes_as_hex(to_bytes(roothash)))
 
+	fmt.Println("---")
 //Reset random function, doing exact same to it.
 	r = rand.New(rand.NewSource(seed))
-	for i := 0 ; i < 1 ; i++ {
+	for i := 0 ; i < N ; i++ {
 		chunk := rand_chunk(r, n_min, n_max)
-		if !merkletree.CorrectRoot(roothash, chunk, list[i].Path()) {
-			fmt.Println("One of the Merkle Paths did not check out!")
+		if !list[i].IsValid(-1) || !list[i].CorrespondsToChunk(chunk) {
+			fmt.Println("Chunk %v didnt check out.", i)
+		}
+		
+		path := list[i].Path()
+//		root := merkletree.ExpectedRoot(merkletree.H(chunk), path)
+//		fmt.Println(bytes_as_hex(to_bytes(root)))
+
+		if !merkletree.CorrectRoot(roothash, chunk, path) {
+			fmt.Println(" - One of the Merkle Paths did not check out!")
 		}
 	}
 }
@@ -63,17 +83,6 @@ func main() {
 	flag.Parse()
 
 	fmt.Println("Seed", seed)
-	run_test(seed, 8, 32, 900)
-	
-	r := rand.New(rand.NewSource(seed))
-	a := rand_bytes(r, 32)
-	fmt.Println("a: ", bytes_as_hex(a))
-	b := rand_bytes(r, 32)
-	fmt.Println("b: ", bytes_as_hex(b))
-	
-	gen := merkletree.NewMerkleTreeGen()
-	gen.AddChunk(a, true)
-	gen.AddChunk(b, true)
 
-	fmt.Println(gen.List)
+	run_test(seed, 8, 32, 32)
 }

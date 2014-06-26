@@ -3,10 +3,21 @@ package merkletree
 //NOTE: untested.
 
 import (
-//	"fmt"
+	"fmt"
 	"crypto/sha256"
 )
 
+// Print helpers.
+func bytes_as_hex(input []byte) string {
+	hex := "0123456789ABCDEF"
+	out := ""
+	for i := range input {
+		val := uint8(input[i])
+		out = string(append([]byte(out), hex[val%16]))
+		out = string(append([]byte(out), hex[val/16]))
+	}
+	return out
+}
 
 func FirstBit(hash [sha256.Size]byte) bool {
 	return hash[0]%2 == 1
@@ -26,16 +37,17 @@ func to_bytes(x [sha256.Size]byte) []byte {
 	}
 	return ret
 }
+//Copies it.. because no go stuff for that ><
 func to_byte256(x []byte) [sha256.Size]byte {
 	//assert len(x)==sha256.size
 	ret := [sha256.Size]byte{}
-	for i := 1 ; i < sha256.Size ; i++ {
+	for i := 0 ; i < sha256.Size ; i++ {
 		ret[i] = x[i]
 	}
 	return ret
 }
 
-// Too bytes, first bit zero.
+// Too 'plain lengths' bytes, first bit zero.
 func tbfb(x [sha256.Size]byte) []byte {
 	ret := to_bytes(x)
 	ret[0] -= ret[0]%2
@@ -47,7 +59,7 @@ func H(a []byte) [sha256.Size]byte {
 }
 // TODO might want to add them and then sha instead, easier in EVM?
 func H_2(a [sha256.Size]byte, b [sha256.Size]byte) [sha256.Size]byte {
-	return sha256.Sum256(append(tbfb(a), tbfb(b)...))
+	return SetFirstBit(sha256.Sum256(append(tbfb(a), tbfb(b)...)), false)
 }
 
 
@@ -110,7 +122,9 @@ func (gen *MerkleTreeGen) AddChunk(chunk []byte, interest bool) *MerkleNode {
 	if len(gen.List) == 0 || gen.List[0].Depth != 1 {
 		add_node := &MerkleNode{Hash:h, Left:nil, Right:nil, Up:nil}
 
-		gen.List = append(gen.List, MerkleTreePortion{Node:add_node, Depth:1})
+		list := []MerkleTreePortion{}
+		list = append(list, MerkleTreePortion{Node:add_node, Depth:1})
+		gen.List = append(list, gen.List...)
 		return add_node
 	} else {
 		// assert gen.List[0].Depth == 1
@@ -142,24 +156,49 @@ func (gen *MerkleTreeGen) Finish() *MerkleNode {
 	return gen.List[0].Node
 }
 
-// Calculate the path, requires that you have calculated it up to the root.
-// Note that the first bit that was used to indicate interest, now indicates
-// it goes to the right.
+// Self-check. Not that since you can remove the rest of the nodes, this
+// essentially already does proving by paths-and-chunks.
+func (node *MerkleNode) IsValid(recurse int32) bool {
+	if node.Left != nil && node.Right != nil {
+		if H_2(node.Left.Hash, node.Right.Hash) != SetFirstBit(node.Hash, false) {
+			return false
+		}
+	}
+	if recurse == 0 || node.Up == nil {
+		return true
+	}
+	return node.Up.IsValid(recurse - 1)
+}
+
+func (node *MerkleNode) CorrespondsToChunk(chunk []byte) bool {
+	return SetFirstBit(H(chunk), false) == SetFirstBit(node.Hash, false)
+}
+
+// Calculated paths essentially make a compilation of the data needed to do the
+// check. 
 func (node *MerkleNode) Path() [][sha256.Size]byte {
-	if node.Up == nil {
+	if node.Right != nil || node.Left != nil {
+		fmt.Println("Not a leaf!")
+		return [][sha256.Size]byte{}
+	} else if node.Up == nil {
 		return [][sha256.Size]byte{}
 	} else {
-		return node.Up.path()
+		return node.Up.path(node)
 	}
 }
-func (node *MerkleNode) path() [][sha256.Size]byte {
-	if node.Up == nil {
-		return [][sha256.Size]byte{}
-	} else if node.Up.Right == node { //Going right.
-		return append(node.Up.path(), to_byte256(tbfb(node.Left.Hash)))
-	}	else if node.Up.Left == node { //Going left.
-		return append(node.Up.path(), to_byte256(tbfb(node.Right.Hash)))
+
+func (node *MerkleNode) path(from *MerkleNode) [][sha256.Size]byte {
+	path := [][sha256.Size]byte{}
+	if node.Up != nil {
+		path = node.Up.path(node)
+	}
+
+	if node.Right == from { //Came from right.
+		return append(path, SetFirstBit(node.Left.Hash, true))
+	}	else if node.Left == from { //Came from left.
+		return append(path, SetFirstBit(node.Right.Hash, false))
 	}	else { // Information was not stored, or invalid Merkle tree.
+		fmt.Println("Invalid")
 		return [][sha256.Size]byte{}
 	}
 }
@@ -168,11 +207,11 @@ func (node *MerkleNode) path() [][sha256.Size]byte {
 func ExpectedRoot(H_leaf [sha256.Size]byte, path [][sha256.Size]byte) [sha256.Size]byte {
 	x := H_leaf
 	for i := range path {
-		h := path[i]
+		h := path[len(path) - i - 1]
 		if FirstBit(h) {
-			x = H_2(x, h)
-		} else {
 			x = H_2(h, x)
+		} else {
+			x = H_2(x, h)
 		}
 	}
 	return x
@@ -180,5 +219,5 @@ func ExpectedRoot(H_leaf [sha256.Size]byte, path [][sha256.Size]byte) [sha256.Si
 
 //Checks a root.
 func CorrectRoot(root [sha256.Size]byte, leaf []byte, path [][sha256.Size]byte) bool {
-	return ExpectedRoot(H(leaf), path) == root
+	return SetFirstBit(ExpectedRoot(H(leaf), path), false) == SetFirstBit(root, false)
 }
