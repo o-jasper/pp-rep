@@ -3,6 +3,7 @@ package merkletree
 //NOTE: untested.
 
 import (
+//	"fmt"
 	"crypto/sha256"
 )
 
@@ -146,15 +147,20 @@ func (gen *MerkleTreeGen) Finish() *MerkleNode {
 // it goes to the right.
 func (node *MerkleNode) Path() [][sha256.Size]byte {
 	if node.Up == nil {
-		var ret [][sha256.Size]byte
-		return ret
+		return [][sha256.Size]byte{}
+	} else {
+		return node.Up.path()
+	}
+}
+func (node *MerkleNode) path() [][sha256.Size]byte {
+	if node.Up == nil {
+		return [][sha256.Size]byte{}
 	} else if node.Up.Right == node { //Going right.
-		return append(node.Up.Path(), to_byte256(tbfb(node.Left.Hash)))
+		return append(node.Up.path(), to_byte256(tbfb(node.Left.Hash)))
 	}	else if node.Up.Left == node { //Going left.
-		return append(node.Up.Path(), to_byte256(tbfb(node.Right.Hash)))
+		return append(node.Up.path(), to_byte256(tbfb(node.Right.Hash)))
 	}	else { // Information was not stored, or invalid Merkle tree.
-		var ret [][sha256.Size]byte
-		return ret
+		return [][sha256.Size]byte{}
 	}
 }
 

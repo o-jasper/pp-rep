@@ -49,7 +49,7 @@ func run_test(seed int64, n_min int32, n_max int32, N int) {
 
 //Reset random function, doing exact same to it.
 	r = rand.New(rand.NewSource(seed))
-	for i := 0 ; i < N ; i++ {
+	for i := 0 ; i < 1 ; i++ {
 		chunk := rand_chunk(r, n_min, n_max)
 		if !merkletree.CorrectRoot(roothash, chunk, list[i].Path()) {
 			fmt.Println("One of the Merkle Paths did not check out!")
@@ -64,7 +64,7 @@ func main() {
 
 	fmt.Println("Seed", seed)
 	run_test(seed, 8, 32, 900)
-
+	
 	r := rand.New(rand.NewSource(seed))
 	a := rand_bytes(r, 32)
 	fmt.Println("a: ", bytes_as_hex(a))
