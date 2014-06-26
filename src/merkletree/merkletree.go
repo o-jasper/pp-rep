@@ -99,8 +99,12 @@ type MerkleTreeGen struct {
 	List []MerkleTreePortion
 }
 
+func NewMerkleTreeGen() *MerkleTreeGen {
+	return &MerkleTreeGen{List:[]MerkleTreePortion{}}
+}
+
 // Adds chunk, returning the leaf the current is on.
-func (gen MerkleTreeGen) AddChunk(chunk []byte, interest bool) *MerkleNode {
+func (gen *MerkleTreeGen) AddChunk(chunk []byte, interest bool) *MerkleNode {
 	h := SetFirstBit(H(chunk), interest)
 	if len(gen.List) == 0 || gen.List[0].Depth != 1 {
 		add_node := &MerkleNode{Hash:h, Left:nil, Right:nil, Up:nil}
@@ -127,7 +131,7 @@ func (gen MerkleTreeGen) AddChunk(chunk []byte, interest bool) *MerkleNode {
 // Coerce the last parts together, returning the root.
 // NOTE: you can 'finish' and then continue to make what you put in already
 // becomes a bit of a 'lob' that takes longer Merkle paths.
-func (gen MerkleTreeGen) Finish() *MerkleNode {
+func (gen *MerkleTreeGen) Finish() *MerkleNode {
 	// assert len(gen.List) > 0
 	for len(gen.List) >= 2  {
 		new_node := selective_new_MerkleNode(gen.List[0].Node, gen.List[1].Node)
