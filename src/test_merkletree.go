@@ -58,6 +58,7 @@ func run_test(seed int64, n_min int32, n_max int32, N int) {
 		}
 		
 		path := list[i].Path()
+// For if you want to print it.
 //		root := merkletree.ExpectedRoot(merkletree.H(chunk), path)
 //		fmt.Println(hex.EncodeToString(to_bytes(root)))
 
@@ -69,6 +70,9 @@ func run_test(seed int64, n_min int32, n_max int32, N int) {
 	fmt.Println("No messages above implies success.")
 }
 
+//TODO (before serious use)
+// * Go through a series of random seeds.
+// * Test being disinterested better.
 func main() {
 	var seed int64
 	flag.Int64Var(&seed, "seed", rand.Int63(), "Random seed for test.")
