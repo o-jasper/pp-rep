@@ -15,26 +15,17 @@ func SetFirstBit(hash [sha256.Size]byte, to bool) [sha256.Size]byte {
 	return hash
 }
 
-func to_bytes(x [sha256.Size]byte) []byte {
-	ret := []byte{}
-	for i := range x {
-		ret = append(ret, x[i])
-	}
-	return ret
-}
 //Copies it.. because no go stuff for that ><
 func to_byte256(x []byte) [sha256.Size]byte {
 	//assert len(x)==sha256.size
-	ret := [sha256.Size]byte{}
-	for i := 0 ; i < sha256.Size ; i++ {
-		ret[i] = x[i]
-	}
+	var ret [sha256.Size]byte
+	copy(ret[:], x)
 	return ret
 }
 
 // Too 'plain lengths' bytes, first bit zero.
 func tbfb(x [sha256.Size]byte) []byte {
-	ret := to_bytes(x)
+	ret := x[:]
 	ret[0] -= ret[0]%2
 	return ret
 }

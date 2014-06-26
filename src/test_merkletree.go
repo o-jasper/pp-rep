@@ -6,19 +6,8 @@ import (
 	"math/rand"
 	"merkletree"
 	"crypto/sha256"
+	"encoding/hex"
 )
-
-// Print helpers.
-func bytes_as_hex(input []byte) string {
-	hex := "0123456789ABCDEF"
-	out := ""
-	for i := range input {
-		val := uint8(input[i])
-		out = string(append([]byte(out), hex[val%16]))
-		out = string(append([]byte(out), hex[val/16]))
-	}
-	return out
-}
 
 //Generating chunks.
 func rand_bytes(r *rand.Rand, n int32) []byte {
@@ -57,7 +46,7 @@ func run_test(seed int64, n_min int32, n_max int32, N int) {
 		list = append(list, gen.AddChunk(chunk, true))
 	}
 	roothash := gen.Finish().Hash  //Get the root hash.
-	fmt.Println("Root:", bytes_as_hex(to_bytes(roothash)))
+	fmt.Println("Root:", hex.EncodeToString(roothash[:]))
 
 	fmt.Println("---")
 //Reset random function, doing exact same to it.
@@ -70,7 +59,7 @@ func run_test(seed int64, n_min int32, n_max int32, N int) {
 		
 		path := list[i].Path()
 //		root := merkletree.ExpectedRoot(merkletree.H(chunk), path)
-//		fmt.Println(bytes_as_hex(to_bytes(root)))
+//		fmt.Println(hex.EncodeToString(to_bytes(root)))
 
 		if !merkletree.CorrectRoot(roothash, chunk, path) {
 			fmt.Println(" - One of the Merkle Paths did not check out!")
