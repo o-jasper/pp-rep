@@ -47,6 +47,7 @@ func to_bytes(x [sha256.Size]byte) []byte {
 
 //Adds a lot of chunks and lists the tree leaves.
 func run_test(seed int64, n_min int32, n_max int32, N int) {
+	fmt.Println("Seed:", seed)
 	r := rand.New(rand.NewSource(seed))
 
 	gen := merkletree.NewMerkleTreeGen()  //Put chunks in.
@@ -56,7 +57,7 @@ func run_test(seed int64, n_min int32, n_max int32, N int) {
 		list = append(list, gen.AddChunk(chunk, true))
 	}
 	roothash := gen.Finish().Hash  //Get the root hash.
-	fmt.Println("\nRoot:", bytes_as_hex(to_bytes(roothash)))
+	fmt.Println("Root:", bytes_as_hex(to_bytes(roothash)))
 
 	fmt.Println("---")
 //Reset random function, doing exact same to it.
@@ -75,14 +76,21 @@ func run_test(seed int64, n_min int32, n_max int32, N int) {
 			fmt.Println(" - One of the Merkle Paths did not check out!")
 		}
 	}
+	fmt.Println("---")
+	fmt.Println("No messages above implies success.")
 }
 
 func main() {
 	var seed int64
-	flag.Int64Var(&seed, "seed", rand.Int63(), "Random seed for test")
+	flag.Int64Var(&seed, "seed", rand.Int63(), "Random seed for test.")
+	var n_min int64
+	flag.Int64Var(&n_min, "n_min", 1, "Minimum length of random chunk.")
+	var n_max int64
+	flag.Int64Var(&n_max, "n_max", 256, "Maximum length of random chunk.")
+	var N int
+	flag.IntVar(&N, "N", 256, "Number of chunks.")
+	
 	flag.Parse()
 
-	fmt.Println("Seed", seed)
-
-	run_test(seed, 8, 32, 32)
+	run_test(seed, int32(n_min), int32(n_max), N)
 }

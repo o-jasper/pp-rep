@@ -1,23 +1,8 @@
 package merkletree
 
-//NOTE: untested.
-
 import (
-	"fmt"
 	"crypto/sha256"
 )
-
-// Print helpers.
-func bytes_as_hex(input []byte) string {
-	hex := "0123456789ABCDEF"
-	out := ""
-	for i := range input {
-		val := uint8(input[i])
-		out = string(append([]byte(out), hex[val%16]))
-		out = string(append([]byte(out), hex[val/16]))
-	}
-	return out
-}
 
 func FirstBit(hash [sha256.Size]byte) bool {
 	return hash[0]%2 == 1
@@ -57,13 +42,10 @@ func tbfb(x [sha256.Size]byte) []byte {
 func H(a []byte) [sha256.Size]byte {
 	return sha256.Sum256(a)
 }
-// TODO might want to add them and then sha instead, easier in EVM?
+
 func H_2(a [sha256.Size]byte, b [sha256.Size]byte) [sha256.Size]byte {
 	return SetFirstBit(sha256.Sum256(append(tbfb(a), tbfb(b)...)), false)
 }
-
-
-//NOTE: Hash64 is too few bits imo...
 
 // A node of Merkle tree, note that the below omits a lot.
 type MerkleNode struct {
@@ -178,7 +160,6 @@ func (node *MerkleNode) CorrespondsToChunk(chunk []byte) bool {
 // check. 
 func (node *MerkleNode) Path() [][sha256.Size]byte {
 	if node.Right != nil || node.Left != nil {
-		fmt.Println("Not a leaf!")
 		return [][sha256.Size]byte{}
 	} else if node.Up == nil {
 		return [][sha256.Size]byte{}
@@ -198,7 +179,6 @@ func (node *MerkleNode) path(from *MerkleNode) [][sha256.Size]byte {
 	}	else if node.Left == from { //Came from left.
 		return append(path, SetFirstBit(node.Right.Hash, false))
 	}	else { // Information was not stored, or invalid Merkle tree.
-		fmt.Println("Invalid")
 		return [][sha256.Size]byte{}
 	}
 }
